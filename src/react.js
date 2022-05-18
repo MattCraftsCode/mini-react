@@ -7,7 +7,27 @@ const React = {
   Component,
   createRef,
   forwardRef,
+  createContext,
 };
+
+function createContext() {
+  let context = { Provider, Consumer };
+  // 创建 2 个函数组件
+  function Provider({ value, children }) {
+    // 从 props 解构出 value、children
+
+    // 1.将 value 赋值给 context._value 属性
+    context._value = value;
+
+    // 2.将子组件 children 返回，按原样渲染
+    return children;
+  }
+
+  function Consumer(props) {}
+
+  // 返回函数组件供外部使用
+  return context;
+}
 
 // 实现1: 使用包装类
 // function forwardRef(FunctionComponent) {

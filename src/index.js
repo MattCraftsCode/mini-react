@@ -1,31 +1,76 @@
 import ReactDOM from "./react-dom";
 import React from "./react";
 
-class App extends React.Component {
-  state = { number: 0 };
-  getSnapshotBeforeUpdate() {
-    return {
-      name: "hsw",
-    };
-  }
+const ThemeContext = React.createContext();
 
-  componentWillUpdate(nextProps, nextState) {
-    console.log(nextProps, nextState);
-  }
-
-  componentDidUpdate(nextProps, nextState, extraArgs) {
-    console.log(nextProps, nextState, extraArgs);
-  }
+class Header extends React.Component {
+  static contextType = ThemeContext;
 
   render() {
     return (
-      <div>
-        <button
-          onClick={() => this.setState({ number: this.state.number + 1 })}
+      <header style={{ color: this.context.color }}>
+        Header:
+        <span
+          onMouseDown={(e) => {
+            console.log("紫色", e.target.textContent);
+            this.context.changeColor("purple");
+          }}
         >
-          按钮: {this.state.number}
+          改成紫色
+        </span>
+      </header>
+    );
+  }
+}
+
+class Footer extends React.Component {
+  static contextType = ThemeContext;
+
+  render() {
+    return (
+      <footer style={{ color: this.context.color }}>
+        Footer:
+        <button
+          onClick={(e) => {
+            console.log("蓝色", e.target);
+            this.context.changeColor("blue");
+          }}
+        >
+          改成蓝色
         </button>
-      </div>
+      </footer>
+    );
+  }
+}
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      color: "red",
+    };
+  }
+
+  changeColor = (newColor) => {
+    console.log(newColor);
+    this.setState({ ...this.state, color: newColor });
+  };
+
+  render() {
+    // 注意: ThemeContext.Provider 必须只有一个子元素，否则 执行 Provider() 返回的 renderVDOM 是一个数组，会导致渲染失败
+    const value = {
+      color: this.state.color,
+      changeColor: this.changeColor,
+    };
+
+    return (
+      <ThemeContext.Provider value={value}>
+        <div>
+          <Header></Header>
+          <Footer></Footer>
+        </div>
+      </ThemeContext.Provider>
     );
   }
 }

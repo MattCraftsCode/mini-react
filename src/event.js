@@ -8,6 +8,7 @@ export function addEvent(dom, eventType, handler) {
     document.store = {};
   }
 
+  // TODO: 这里有 bug，不同 element 的同一个事件会相互覆盖
   document.store[eventType] = handler;
   if (!document[eventType]) {
     document[eventType] = dispatchEvent;

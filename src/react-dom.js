@@ -87,6 +87,12 @@ function mountClassComponent(vdom) {
 
   const instance = new type({ ...defaultProps, ...props });
 
+  // 实现 context
+  if (type.contextType) {
+    // _value 就是 createContext() 返回的 _value，保存了全局的数据
+    instance.context = type.contextType._value;
+  }
+
   // 把类的实例挂载到 vdom（dom-diff 会用到）
   vdom.classInstance = instance;
 

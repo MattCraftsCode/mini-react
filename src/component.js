@@ -23,7 +23,6 @@ class Updater {
   }
 
   addState(partialState, callback) {
-    console.log("setState");
     this.pendingStates.push(partialState);
 
     if (typeof callback === "function") {
@@ -145,6 +144,13 @@ export default class Component {
     let oldRenderVDOM = this.oldRenderVDOM;
     // 根据老的 vdom 查到老的真实 dom
     let oldDom = findDOM(oldRenderVDOM); // div.hello
+
+    // 在渲染之前，重新更新一下 this.context 的数据
+    if (this.constructor.contextType) {
+      // _value 就是 createContext() 返回的 _value，保存了全局的数据
+      this.context = this.constructor.contextType._value;
+    }
+
     // 拿到新的 state 重新生成的 vdom
     let newRenderVDOM = this.render();
 
