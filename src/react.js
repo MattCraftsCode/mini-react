@@ -8,7 +8,25 @@ const React = {
   createRef,
   forwardRef,
   createContext,
+  cloneElement,
 };
+
+/**
+ * 根据一个老的元素，克隆出一个新的元素
+ * @param {*} oldElement 老元素
+ * @param {*} newProps 新属性
+ * @param {*} children 新的儿子们
+ */
+function cloneElement(oldElement, newProps, children) {
+  if (arguments.length > 3) {
+    children = Array.prototype.slice.call(arguments, 2).map(wrapToVDom);
+  } else {
+    children = wrapToVDom(children);
+  }
+  let props = { ...oldElement.props, ...newProps, children };
+  console.log({ ...oldElement, props });
+  return { ...oldElement, props };
+}
 
 function createContext() {
   let context = { Provider, Consumer };
@@ -23,7 +41,13 @@ function createContext() {
     return children;
   }
 
-  function Consumer(props) {}
+  function Consumer({ children }) {
+    if (typeof children !== "function") {
+      throw new Error("Consumer 的 children 只支持函数表达式");
+    }
+
+    return children(context._value);
+  }
 
   // 返回函数组件供外部使用
   return context;

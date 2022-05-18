@@ -94,6 +94,7 @@ function mountClassComponent(vdom) {
   }
 
   // 把类的实例挂载到 vdom（dom-diff 会用到）
+  // 组件的类的实例必须挂载到 vdom 上，方便后续使用
   vdom.classInstance = instance;
 
   if (instance.componentWillMount) {
@@ -121,7 +122,7 @@ function mountClassComponent(vdom) {
 
   // createDOM，将 didMount 绑定到 dom，等待 diff 的时候真正挂载后执行
   if (instance.componentDidMount) {
-    // this ???? 此处有疑问
+    // this ???? 此处有疑问(已经解决，猜测正确)
     dom.componentDidMount = instance.componentDidMount.bind(instance);
   }
 
@@ -157,7 +158,9 @@ function updateProps(dom, oldProps, newProps) {
       // 合成事件
       addEvent(dom, key.toLocaleLowerCase(), newProps[key]);
     } else {
-      dom[key] = newProps[key];
+      if (newProps[key]) {
+        dom[key] = newProps[key];
+      }
     }
   }
 }
