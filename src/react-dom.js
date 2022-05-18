@@ -49,6 +49,9 @@ function createDOM(vdom) {
     }
   }
 
+  // 让 vdom 的 dom 属性指向真实 dom
+  vdom.dom = dom;
+
   return dom;
 }
 
@@ -56,17 +59,30 @@ function mountClassComponent(vdom) {
   const { type, props } = vdom;
   const instance = new type(props);
   const renderVDOM = instance.render();
+
+  console.log(vdom, renderVDOM);
+
+  // 每次更新时，把老的 vdom 挂在到类实例上
+  instance.oldRenderVDOM = renderVDOM;
+  // 类组件本身是没有 dom 的，需要手动挂载
+  vdom.oldRenderVDOM = renderVDOM;
+
   return createDOM(renderVDOM);
 }
 
 function mountFunctionComponent(vdom) {
   const { type, props } = vdom;
   const renderVDOM = type(props);
+
+  // 函数组件本身是没有 dom 的，需要手动挂载
+  vdom.oldRenderVDOM = renderVDOM;
+
   return createDOM(renderVDOM);
 }
 
 function reconcileChildren(children, parentDOM) {
   for (const child of children) {
+    // TODO 增加判断: undefined 或 null 的节点，应该不渲染
     render(child, parentDOM);
   }
 }
@@ -77,10 +93,44 @@ function updateProps(dom, oldProps, newProps) {
       continue;
     } else if (key === "style") {
       Object.assign(dom.style, newProps[key]);
+    } else if (key.startsWith("on")) {
+      // 绑定事件
+      dom[key.toLocaleLowerCase()] = newProps[key];
     } else {
       dom[key] = newProps[key];
     }
   }
+}
+
+/**
+ * 根据 vdom 返回真实 dom
+ * @param {} vdom
+ * @returns
+ */
+export function findDOM(vdom) {
+  let { type } = vdom;
+  let dom;
+  if (typeof type === "function") {
+    // typeof type === 'function'， 可能是函数组件、类组件
+    dom = findDOM(vdom.oldRenderVDOM);
+  } else {
+    dom = vdom.dom;
+  }
+
+  return dom;
+}
+
+/**
+ * 比较新旧 VDOM，找出差异，更新到真实 DOM 上
+ * @param {*} parentDOM
+ * @param {*} oldVDOM
+ * @param {*} newVDOM
+ */
+export function compareTwoVDOM(parentDOM, oldVDOM, newVDOM) {
+  let oldDOM = findDOM(oldVDOM);
+  let newDOM = createDOM(newVDOM);
+
+  parentDOM.replaceChild(newDOM, oldDOM);
 }
 
 const ReactDOM = {

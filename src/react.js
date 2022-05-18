@@ -15,7 +15,7 @@ export function createElement(type, config, children) {
   if (arguments.length > 3) {
     // children 是一个数组
     props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVDom);
-  } else if (children) {
+  } else {
     // children 是一个对象
     props.children = wrapToVDom(children);
   }
