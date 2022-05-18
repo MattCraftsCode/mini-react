@@ -105,8 +105,23 @@ function shouldUpdate(classInstance, nextProps, nextState) {
     classInstance.props = nextProps;
   }
 
+  // 实现 static getDerivedStateFromProps 生命周期函数
+  // 类的 static 成员，要通过 constructor 去调用
+  // 作用，接收 新的属性（nextProps）和 老的状态(state)，由调用者决定是否需要用新的 props 修改当前组件的 state
+  if (classInstance.constructor.getDerivedStateFromProps) {
+    let newState = classInstance.constructor.getDerivedStateFromProps(
+      nextProps, // 新的属性
+      classInstance.state // 老的状态
+    );
+    if (newState) {
+      classInstance.state = newState;
+    }
+  } else {
+    classInstance.state = nextState; //永远指向最新的状态
+  }
+
   // static getDerivedStateFromProps 必须在给组件实例赋值前调用
-  classInstance.state = nextState;
+  // classInstance.state = nextState;
 
   if (willUpdate) {
     classInstance.forceUpdate();
