@@ -82,15 +82,15 @@ class Updater {
  * 更新组件
  * @param {*} classInstance
  * @param {*} nextProps 新属性
- * @param {*} newState 新状态
+ * @param {*} nextState 新状态
  */
-function shouldUpdate(classInstance, nextProps, newState) {
+function shouldUpdate(classInstance, nextProps, nextState) {
   let willUpdate = true; // 是否要更新，默认值是 true
 
   // 不更新
   if (
     classInstance.shouldComponentUpdate &&
-    !classInstance.shouldComponentUpdate(nextProps, newState)
+    !classInstance.shouldComponentUpdate(nextProps, nextState)
   ) {
     willUpdate = false;
   }
@@ -104,7 +104,9 @@ function shouldUpdate(classInstance, nextProps, newState) {
   if (nextProps) {
     classInstance.props = nextProps;
   }
-  classInstance.state = newState;
+
+  // static getDerivedStateFromProps 必须在给组件实例赋值前调用
+  classInstance.state = nextState;
 
   if (willUpdate) {
     classInstance.forceUpdate();

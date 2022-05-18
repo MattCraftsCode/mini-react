@@ -1,4 +1,5 @@
 import Component from "./component";
+import { REACT_FORWARD_REF_TYPE } from "./constants";
 import { wrapToVDom } from "./utils";
 
 const React = {
@@ -8,11 +9,23 @@ const React = {
   forwardRef,
 };
 
-function forwardRef(FunctionComponent) {
-  return class extends Component {
-    render() {
-      return FunctionComponent(this.props, this.props.ref);
-    }
+// 实现1: 使用包装类
+// function forwardRef(FunctionComponent) {
+//   return class extends Component {
+//     render() {
+//       return FunctionComponent(this.props, this.props.ref);
+//     }
+//   };
+// }
+
+// 实现2: 返回特殊对象
+// 此种方法的特点
+// 1.和源码接近
+// 2.ref 来自 vdom，不再来自 props，在 React.createElement() 方法中可以 `delete config.ref;` 删除 props 的 ref
+function forwardRef(render) {
+  return {
+    $$typeof: REACT_FORWARD_REF_TYPE,
+    render,
   };
 }
 
@@ -31,7 +44,7 @@ function createElement(type, config, children) {
     key = config.key;
     ref = config.ref;
     delete config.key;
-    // delete config.ref;
+    delete config.ref;
   }
 
   let props = { ...config };

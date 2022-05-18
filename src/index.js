@@ -4,18 +4,33 @@
 import ReactDOM from "./react-dom";
 import React from "./react";
 
+class Counter extends React.Component {
+  componentWillMount() {
+    console.log("子组件: componentWillMount");
+  }
+
+  render() {
+    return <div>Counter</div>;
+  }
+
+  componentDidMount() {
+    console.log("子组件: componentDidMount");
+  }
+
+  componentWillUnmount() {
+    console.log("子组件: componentWillUnmount");
+  }
+
+  componentWillReceiveProps() {
+    console.log("子组件: componentWillReceiveProps");
+  }
+}
+
 class App extends React.Component {
   state = { number: 1 };
   constructor(props) {
     super(props);
-
-    console.log("constructor");
   }
-
-  handleClick = () => {
-    this.setState({ number: this.state.number + 1 });
-    console.log(this.state);
-  };
 
   componentWillMount() {
     console.log("componentWillMount");
@@ -29,15 +44,17 @@ class App extends React.Component {
     console.log("componentDidUpdate");
   }
 
+  handleClick = () => {
+    this.setState({
+      number: this.state.number + 1,
+    });
+  };
+
   render() {
-    console.log("render");
     return (
       <div>
-        <button onClick={this.handleClick}>按钮</button>
-        <header>header</header>
-        <main>main</main>
-        <article>article: {this.state.number}</article>
-        <footer>footer</footer>
+        <button onClick={this.handleClick}>{this.state.number}</button>
+        <Counter></Counter>
       </div>
     );
   }
@@ -48,12 +65,8 @@ class App extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     console.log("shouldComponentUpdate", nextState);
-    // return nextState.number % 2 === 0;
+    // return nextState.number % 2 === 1;
     return true;
-  }
-
-  componentWillUnmount() {
-    console.log("componentWillUnmount");
   }
 }
 
