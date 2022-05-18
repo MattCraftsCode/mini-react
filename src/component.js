@@ -96,7 +96,7 @@ function shouldUpdate(classInstance, nextProps, nextState) {
   }
 
   if (willUpdate && classInstance.componentWillUpdate) {
-    classInstance.componentWillUpdate();
+    classInstance.componentWillUpdate(nextProps, nextState);
   }
 
   // 不管要不要更新，props 和 state 都要更新
@@ -148,14 +148,23 @@ export default class Component {
     // 拿到新的 state 重新生成的 vdom
     let newRenderVDOM = this.render();
 
+    // 处理 getSnapshotBeforeUpdate
+    // https://zh-hans.reactjs.org/docs/react-component.html#getsnapshotbeforeupdate
+    // TODO 问题，为什么要在 compareTwoVDOM 之前？
+
+    let extraArgs;
+    if (this.getSnapshotBeforeUpdate) {
+      extraArgs = this.getSnapshotBeforeUpdate();
+    }
+
     compareTwoVDOM(oldDom.parentNode, oldRenderVDOM, newRenderVDOM);
 
     this.oldRenderVDOM = newRenderVDOM;
 
     // 调用更新完成生命周期函数
-    if (this.componentWillUpdate) {
+    if (this.componentDidUpdate) {
       // 传入最新的 props state
-      this.componentWillUpdate(this.props, this.state);
+      this.componentDidUpdate(this.props, this.state, extraArgs);
     }
   }
 }

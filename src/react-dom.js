@@ -116,7 +116,7 @@ function mountClassComponent(vdom) {
   // createDOM，将 didMount 绑定到 dom，等待 diff 的时候真正挂载后执行
   if (instance.componentDidMount) {
     // this ???? 此处有疑问
-    dom.componentDidMount = instance.componentDidMount.bind(this);
+    dom.componentDidMount = instance.componentDidMount.bind(instance);
   }
 
   return dom;
