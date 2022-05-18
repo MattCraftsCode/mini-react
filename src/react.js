@@ -5,13 +5,22 @@ const React = {
   createElement,
   Component,
   createRef,
+  forwardRef,
 };
 
-export function createRef() {
+function forwardRef(FunctionComponent) {
+  return class extends Component {
+    render() {
+      return FunctionComponent(this.props, this.props.ref);
+    }
+  };
+}
+
+function createRef() {
   return { current: null };
 }
 
-export function createElement(type, config, children) {
+function createElement(type, config, children) {
   let key;
   let ref;
   if (config) {
@@ -22,8 +31,9 @@ export function createElement(type, config, children) {
     key = config.key;
     ref = config.ref;
     delete config.key;
-    delete config.ref;
+    // delete config.ref;
   }
+
   let props = { ...config };
   if (arguments.length > 3) {
     // children 是一个数组

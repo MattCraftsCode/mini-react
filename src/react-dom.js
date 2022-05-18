@@ -29,10 +29,10 @@ function createDOM(vdom) {
   } else if (typeof type === "function") {
     if (type.isReactComponent) {
       // 挂载类组件
-      dom = mountClassComponent(vdom);
+      return mountClassComponent(vdom); // 已经给 ref 赋值了
     } else {
       // 挂载函数组件
-      dom = mountFunctionComponent(vdom);
+      return mountFunctionComponent(vdom);
     }
   } else {
     // 否则创建成元素节点
@@ -61,7 +61,7 @@ function createDOM(vdom) {
 }
 
 function mountClassComponent(vdom) {
-  const { type, props } = vdom;
+  const { type, props, ref } = vdom;
   const instance = new type(props);
   const renderVDOM = instance.render();
 
@@ -69,6 +69,11 @@ function mountClassComponent(vdom) {
   instance.oldRenderVDOM = renderVDOM;
   // 类组件本身是没有 dom 的，需要手动挂载
   vdom.oldRenderVDOM = renderVDOM;
+
+  // 处理类的 ref
+  if (ref) {
+    ref.current = instance;
+  }
 
   return createDOM(renderVDOM);
 }
