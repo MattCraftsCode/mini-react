@@ -62,7 +62,11 @@ function createDOM(vdom) {
 
 function mountClassComponent(vdom) {
   const { type, props, ref } = vdom;
-  const instance = new type(props);
+
+  // 类组件的 defaultProps
+  let defaultProps = type.defaultProps || {};
+
+  const instance = new type({ ...defaultProps, ...props });
 
   if (instance.componentWillMount) {
     instance.componentWillMount();
@@ -146,10 +150,64 @@ export function findDOM(vdom) {
  * @param {*} newVDOM
  */
 export function compareTwoVDOM(parentDOM, oldVDOM, newVDOM) {
-  let oldDOM = findDOM(oldVDOM);
-  let newDOM = createDOM(newVDOM);
+  // let oldDOM = findDOM(oldVDOM);
+  // let newDOM = createDOM(newVDOM);
 
-  parentDOM.replaceChild(newDOM, oldDOM);
+  // parentDOM.replaceChild(newDOM, oldDOM);
+
+  if (!oldVDOM && !newVDOM) {
+    //  如果老的 vdom 和 新的 vdom 都是 null or undefined
+    return null;
+  } else if (oldVDOM && !newVDOM) {
+    // 老的存在，新的不存在，销毁老组件
+    let currentDOM = findDOM(oldVDOM);
+    currentDOM.parentNode.removeChild(currentDOM);
+
+    if (oldVDOM.classInstance && oldVDOM.classInstance.componentWillUnmount) {
+      oldVDOM.classInstance.componentWillUnmount();
+    }
+    return null;
+  } else if (!oldVDOM && newVDOM) {
+    let newDOM = createDOM(newVDOM);
+    parentDOM.appendChild(newDOM); // 此处可能是插入到当前位置 insertBefore??
+    return newDOM;
+  } else if (oldVDOM && newVDOM && oldVDOM.type !== newVDOM.type) {
+    // 老的 vdom 和新的 vdom 都存在，但是 type 不同，则全部替换
+    let oldDOM = findDOM(oldVDOM);
+    let newDOM = createDOM(newVDOM);
+    oldDOM.parentNode.replaceChild(newDOM, oldDOM);
+
+    // 销毁老的组件
+    if (oldVDOM.classInstance && oldVDOM.classInstance.componentWillUnmount) {
+      oldVDOM.classInstance.componentWillUnmount();
+    }
+    return newDOM;
+  } else {
+    // 老的存在，新的存在，类型相同，则需要复用老的节点，进行深度比较
+    updateElement(oldVDOM, newVDOM);
+  }
+}
+
+function updateElement(oldVDOM, newVDOM) {
+  // 如果老的 oldVDOM 是普通元素组件，如 div
+  if (typeof oldVDOM.type === "string") {
+    let currentDOM = (newVDOM.dom = findDOM(oldVDOM));
+    // 让新的属性更新 DOM的老属性
+    updateProps(currentDOM, oldVDOM.props, newVDOM.props);
+    updateChildren(currentDOM, oldVDOM.props.children, newVDOM.props.children);
+  }
+}
+
+function updateChildren(parentDOM, oldVChildren, newVChildren) {
+  // 预处理，全部转成数组，方便逐个比较
+  oldVChildren = Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren];
+  newVChildren = Array.isArray(newVChildren) ? newVChildren : [newVChildren];
+
+  let maxLength = Math.max(oldVChildren.length, newVChildren.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    compareTwoVDOM(parentDOM, oldVChildren[i], newVChildren[i]);
+  }
 }
 
 const ReactDOM = {

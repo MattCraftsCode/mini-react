@@ -13,7 +13,8 @@ class App extends React.Component {
   }
 
   handleClick = () => {
-    this.setState({ count: this.state.number + 1 });
+    this.setState({ number: this.state.number + 1 });
+    console.log(this.state);
   };
 
   componentWillMount() {
@@ -30,7 +31,15 @@ class App extends React.Component {
 
   render() {
     console.log("render");
-    return <div onClick={this.handleClick}>App</div>;
+    return (
+      <div>
+        <button onClick={this.handleClick}>按钮</button>
+        <header>header</header>
+        <main>main</main>
+        <article>article: {this.state.number}</article>
+        <footer>footer</footer>
+      </div>
+    );
   }
 
   componentDidMount() {
@@ -38,8 +47,13 @@ class App extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    console.log("shouldComponentUpdate");
-    return nextState.number % 2 === 0;
+    console.log("shouldComponentUpdate", nextState);
+    // return nextState.number % 2 === 0;
+    return true;
+  }
+
+  componentWillUnmount() {
+    console.log("componentWillUnmount");
   }
 }
 

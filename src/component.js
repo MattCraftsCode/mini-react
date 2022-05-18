@@ -78,9 +78,37 @@ class Updater {
   }
 }
 
+/**
+ * 更新组件
+ * @param {*} classInstance
+ * @param {*} nextProps 新属性
+ * @param {*} newState 新状态
+ */
 function shouldUpdate(classInstance, nextProps, newState) {
+  let willUpdate = true; // 是否要更新，默认值是 true
+
+  // 不更新
+  if (
+    classInstance.shouldComponentUpdate &&
+    !classInstance.shouldComponentUpdate(nextProps, newState)
+  ) {
+    willUpdate = false;
+  }
+
+  if (willUpdate && classInstance.componentWillUpdate) {
+    classInstance.componentWillUpdate();
+  }
+
+  // 不管要不要更新，props 和 state 都要更新
+  // nextProps 可能没有，state 一定有
+  if (nextProps) {
+    classInstance.props = nextProps;
+  }
   classInstance.state = newState;
-  classInstance.forceUpdate();
+
+  if (willUpdate) {
+    classInstance.forceUpdate();
+  }
 }
 
 export default class Component {
@@ -106,5 +134,11 @@ export default class Component {
     compareTwoVDOM(oldDom.parentNode, oldRenderVDOM, newRenderVDOM);
 
     this.oldRenderVDOM = newRenderVDOM;
+
+    // 调用更新完成生命周期函数
+    if (this.componentWillUpdate) {
+      // 传入最新的 props state
+      this.componentWillUpdate(this.props, this.state);
+    }
   }
 }
