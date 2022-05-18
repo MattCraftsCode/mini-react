@@ -63,7 +63,16 @@ function createDOM(vdom) {
 function mountClassComponent(vdom) {
   const { type, props, ref } = vdom;
   const instance = new type(props);
+
+  if (instance.componentWillMount) {
+    instance.componentWillMount();
+  }
+
   const renderVDOM = instance.render();
+
+  if (instance.componentDidMount) {
+    instance.componentDidMount();
+  }
 
   // 每次更新时，把老的 vdom 挂在到类实例上
   instance.oldRenderVDOM = renderVDOM;
