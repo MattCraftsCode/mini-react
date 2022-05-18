@@ -148,7 +148,7 @@ export default class Component {
     // 在渲染之前，重新更新一下 this.context 的数据
     if (this.constructor.contextType) {
       // _value 就是 createContext() 返回的 _value，保存了全局的数据
-      this.context = this.constructor.contextType._value;
+      this.context = this.constructor.contextType._currentValue;
     }
 
     // 拿到新的 state 重新生成的 vdom

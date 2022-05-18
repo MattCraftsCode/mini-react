@@ -1,5 +1,9 @@
 import Component from "./component";
-import { REACT_FORWARD_REF_TYPE } from "./constants";
+import {
+  REACT_CONTEXT,
+  REACT_FORWARD_REF_TYPE,
+  REACT_PROVIDER,
+} from "./constants";
 import { wrapToVDom } from "./utils";
 
 const React = {
@@ -28,29 +32,40 @@ function cloneElement(oldElement, newProps, children) {
   return { ...oldElement, props };
 }
 
+// 实现一
+// function createContext() {
+//   let context = { Provider, Consumer };
+//   // 创建 2 个函数组件
+//   function Provider({ value, children }) {
+//     // 从 props 解构出 value、children
+
+//     // 1.将 value 赋值给 context._value 属性
+//     context._value = value;
+
+//     // 2.将子组件 children 返回，按原样渲染
+//     return children;
+//   }
+
+//   function Consumer({ children }) {
+//     if (typeof children !== "function") {
+//       throw new Error("Consumer 的 children 只支持函数表达式");
+//     }
+
+//     return children(context._value);
+//   }
+
+//   // 返回函数组件供外部使用
+//   return context;
+// }
+
+// 实现二: 更接近源码
 function createContext() {
-  let context = { Provider, Consumer };
-  // 创建 2 个函数组件
-  function Provider({ value, children }) {
-    // 从 props 解构出 value、children
+  const _context = { $$typeof: REACT_CONTEXT };
 
-    // 1.将 value 赋值给 context._value 属性
-    context._value = value;
+  _context.Provider = { $$typeof: REACT_PROVIDER, _context };
+  _context.Consumer = { $$typeof: REACT_CONTEXT, _context };
 
-    // 2.将子组件 children 返回，按原样渲染
-    return children;
-  }
-
-  function Consumer({ children }) {
-    if (typeof children !== "function") {
-      throw new Error("Consumer 的 children 只支持函数表达式");
-    }
-
-    return children(context._value);
-  }
-
-  // 返回函数组件供外部使用
-  return context;
+  return _context;
 }
 
 // 实现1: 使用包装类
