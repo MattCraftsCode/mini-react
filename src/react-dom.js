@@ -1,4 +1,5 @@
 import { REACT_TEXT } from "./constants";
+import { addEvent } from "./event";
 
 /**
  * 把虚拟 DOM 转成 DOM 并插入到文档中
@@ -19,7 +20,7 @@ function render(vdom, container) {
  * @returns
  */
 function createDOM(vdom) {
-  let { type, props } = vdom;
+  let { type, props, ref } = vdom;
   let dom;
   if (type === REACT_TEXT) {
     // console.log("type", type);
@@ -52,6 +53,10 @@ function createDOM(vdom) {
   // 让 vdom 的 dom 属性指向真实 dom
   vdom.dom = dom;
 
+  if (ref) {
+    ref.current = dom;
+  }
+
   return dom;
 }
 
@@ -59,8 +64,6 @@ function mountClassComponent(vdom) {
   const { type, props } = vdom;
   const instance = new type(props);
   const renderVDOM = instance.render();
-
-  console.log(vdom, renderVDOM);
 
   // 每次更新时，把老的 vdom 挂在到类实例上
   instance.oldRenderVDOM = renderVDOM;
@@ -95,7 +98,9 @@ function updateProps(dom, oldProps, newProps) {
       Object.assign(dom.style, newProps[key]);
     } else if (key.startsWith("on")) {
       // 绑定事件
-      dom[key.toLocaleLowerCase()] = newProps[key];
+      // dom[key.toLocaleLowerCase()] = newProps[key];
+      // 合成事件
+      addEvent(dom, key.toLocaleLowerCase(), newProps[key]);
     } else {
       dom[key] = newProps[key];
     }

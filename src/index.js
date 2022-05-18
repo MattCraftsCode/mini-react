@@ -1,35 +1,23 @@
 import ReactDOM from "./react-dom";
 import React from "./react";
 
-class Counter extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      count: 1,
-    };
+    this.myRef = React.createRef();
   }
   render() {
-    return <div className="hello">Counter</div>;
+    return (
+      <div ref={this.myRef}>
+        App <button onClick={this.handleClick}>按钮</button>
+      </div>
+    );
   }
 
   handleClick = () => {
-    this.setState({ count: 2 });
+    console.log(this.myRef);
   };
 }
 
-function FunctionComponent() {
-  return <Counter></Counter>;
-}
-
-class App extends React.Component {
-  render() {
-    setTimeout(() => {
-      this.forceUpdate();
-    }, 2000);
-    return <FunctionComponent></FunctionComponent>;
-  }
-}
-
-let element = <App></App>;
-ReactDOM.render(element, document.getElementById("root"));
+ReactDOM.render(<App></App>, document.getElementById("root"));

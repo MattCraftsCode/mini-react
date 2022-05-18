@@ -1,5 +1,18 @@
 import { compareTwoVDOM, findDOM } from "./react-dom";
 
+export const updateQueue = {
+  isBatchingUpdate: false,
+  updaters: [],
+  batchUpdate() {
+    for (const updater of updateQueue.updaters) {
+      updater.updateComponent();
+    }
+
+    updateQueue.isBatchingUpdate = false;
+    updateQueue.updaters.length = 0;
+  },
+};
+
 class Updater {
   constructor(classInstance) {
     this.classInstance = classInstance;
@@ -22,17 +35,23 @@ class Updater {
   }
 
   // 不管状态和属性的变化都会让组件刷新
-  emitUpdate() {
+  emitUpdate(nextProps) {
+    this.nextProps = nextProps;
+
     // 更新组件
     // TODO 需要判断下，批量更新、同步更新
-    this.updateComponent();
+    if (updateQueue.isBatchingUpdate) {
+      updateQueue.updaters.push(this);
+    } else {
+      this.updateComponent();
+    }
   }
 
   // 更新组件
   updateComponent() {
-    let { classInstance, pendingStates } = this;
-    if (pendingStates.length > 0) {
-      shouldUpdate(classInstance, this.getState());
+    let { classInstance, pendingStates, nextProps } = this;
+    if (nextProps || pendingStates.length > 0) {
+      shouldUpdate(classInstance, nextProps, this.getState());
     }
   }
 
@@ -59,7 +78,7 @@ class Updater {
   }
 }
 
-function shouldUpdate(classInstance, newState) {
+function shouldUpdate(classInstance, nextProps, newState) {
   classInstance.state = newState;
   classInstance.forceUpdate();
 }
@@ -78,7 +97,6 @@ export default class Component {
   }
 
   forceUpdate() {
-    debugger;
     let oldRenderVDOM = this.oldRenderVDOM;
     // 根据老的 vdom 查到老的真实 dom
     let oldDom = findDOM(oldRenderVDOM); // div.hello
