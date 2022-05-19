@@ -12,6 +12,8 @@ import {
   useCallback,
   useReducer,
   useContext,
+  useEffect,
+  useLayoutEffect,
 } from "./react-dom";
 
 const React = {
@@ -28,6 +30,8 @@ const React = {
   useCallback,
   useReducer,
   useContext,
+  useEffect,
+  useLayoutEffect,
 };
 
 function memo(type, compare = shallowEqual) {

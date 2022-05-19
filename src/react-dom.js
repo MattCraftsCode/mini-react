@@ -39,6 +39,54 @@ function mount(vdom, container) {
   }
 }
 
+export function useEffect(callback, deps) {
+  if (hookState[hookIndex]) {
+    let [destroy, lastDeps] = hookState[hookIndex];
+    let everySome = deps.every((item, index) => item === lastDeps[index]);
+    if (everySome) {
+      hookIndex++;
+    } else {
+      destroy && destroy();
+      // 开启一个宏任务
+      setTimeout(() => {
+        let destroy = callback();
+        hookState[hookIndex++] = [destroy, deps];
+      });
+    }
+  } else {
+    // 开启一个宏任务
+    setTimeout(() => {
+      let destroy = callback();
+      hookState[hookIndex++] = [destroy, deps];
+    });
+  }
+}
+
+export function useLayoutEffect(callback, deps) {
+  if (hookState[hookIndex]) {
+    let [destroy, lastDeps] = hookState[hookIndex];
+    let everySome = deps.every((item, index) => item === lastDeps[index]);
+    if (everySome) {
+      hookIndex++;
+    } else {
+      destroy && destroy();
+      // 开启一个微任务
+      // 源码并非这样实现，此处为模拟
+      queueMicrotask(() => {
+        let destroy = callback();
+        hookState[hookIndex++] = [destroy, deps];
+      });
+    }
+  } else {
+    // 开启一个微任务
+    // 源码并非这样实现，此处为模拟
+    queueMicrotask(() => {
+      let destroy = callback();
+      hookState[hookIndex++] = [destroy, deps];
+    });
+  }
+}
+
 export function useContext(context) {
   return context._currentValue;
 }
