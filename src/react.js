@@ -1,4 +1,4 @@
-import Component from "./component";
+import Component, { PureComponent } from "./component";
 import {
   REACT_CONTEXT,
   REACT_FORWARD_REF_TYPE,
@@ -13,6 +13,7 @@ const React = {
   forwardRef,
   createContext,
   cloneElement,
+  PureComponent,
 };
 
 /**
@@ -111,8 +112,11 @@ function createElement(type, config, children) {
     // children 是一个数组
     props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVDom);
   } else {
-    // children 是一个对象
-    props.children = wrapToVDom(children);
+    // 解决 PureComponent children 的 undefined 问题
+    if (typeof children !== "undefined") {
+      // children 是一个对象
+      props.children = wrapToVDom(children);
+    }
   }
 
   return {
