@@ -39,6 +39,10 @@ function mount(vdom, container) {
   }
 }
 
+export function useContext(context) {
+  return context._currentValue;
+}
+
 export function useReducer(reducer, initialState) {
   hookState[hookIndex] = hookState[hookIndex] || initialState;
 

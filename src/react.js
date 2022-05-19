@@ -6,7 +6,13 @@ import {
   REACT_PROVIDER,
 } from "./constants";
 import { shallowEqual, wrapToVDom } from "./utils";
-import { useState, useMemo, useCallback, useReducer } from "./react-dom";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useReducer,
+  useContext,
+} from "./react-dom";
 
 const React = {
   createElement,
@@ -21,6 +27,7 @@ const React = {
   useMemo,
   useCallback,
   useReducer,
+  useContext,
 };
 
 function memo(type, compare = shallowEqual) {
