@@ -39,16 +39,35 @@ function mount(vdom, container) {
   }
 }
 
-export function useState(initialState) {
+export function useReducer(reducer, initialState) {
   hookState[hookIndex] = hookState[hookIndex] || initialState;
 
   let currentIndex = hookIndex;
-  function setState(newState) {
-    hookState[currentIndex] = newState;
+  function dispatch(action) {
+    hookState[currentIndex] = reducer
+      ? reducer(hookState[currentIndex], action)
+      : action;
     scheduleUpdate();
   }
-  return [hookState[hookIndex++], setState];
+  return [hookState[hookIndex++], dispatch];
 }
+
+// 实现二: useState 是 useReducer 的语法糖
+export function useState(initialState) {
+  return useReducer(null, initialState);
+}
+
+// 实现一
+// export function useState(initialState) {
+//   hookState[hookIndex] = hookState[hookIndex] || initialState;
+
+//   let currentIndex = hookIndex;
+//   function setState(newState) {
+//     hookState[currentIndex] = newState;
+//     scheduleUpdate();
+//   }
+//   return [hookState[hookIndex++], setState];
+// }
 
 export function useMemo(factory, deps) {
   // 判断是否该值已经设置过了
