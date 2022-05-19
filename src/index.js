@@ -1,12 +1,12 @@
 import ReactDOM from "./react-dom";
 import React from "./react";
 
-class Sub extends React.Component {
-  render() {
-    console.log("Sub render");
-    return <div>Hello</div>;
-  }
+function Sub() {
+  console.log("Sub render");
+  return <div>Sub</div>;
 }
+
+const SubWithMemo = React.memo(Sub);
 
 class App extends React.Component {
   state = { count: 0 };
@@ -20,7 +20,7 @@ class App extends React.Component {
     return (
       <div>
         <button onClick={this.handleClick}>按钮</button>
-        <Sub count={this.state.count}></Sub>
+        <SubWithMemo count={this.state.count}></SubWithMemo>
       </div>
     );
   }

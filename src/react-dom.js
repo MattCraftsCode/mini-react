@@ -1,6 +1,7 @@
 import {
   REACT_CONTEXT,
   REACT_FORWARD_REF_TYPE,
+  REACT_MEMO,
   REACT_PROVIDER,
   REACT_TEXT,
 } from "./constants";
@@ -36,7 +37,9 @@ function mount(vdom, container) {
 function createDOM(vdom) {
   let { type, props, ref } = vdom;
   let dom;
-  if (type && type.$$typeof === REACT_CONTEXT) {
+  if (type && type.$$typeof === REACT_MEMO) {
+    return mountMemoComponent(vdom);
+  } else if (type && type.$$typeof === REACT_CONTEXT) {
     // 处理 context.consumer
     return mountContextComponent(vdom);
   } else if (type && type.$$typeof === REACT_PROVIDER) {
@@ -81,6 +84,15 @@ function createDOM(vdom) {
   }
 
   return dom;
+}
+
+// 处理 memo
+function mountMemoComponent(vdom) {
+  let { type, props } = vdom;
+  let renderVDOM = type.type(props);
+  vdom.prevProps = props; // 记录一下老的属性对象，在更新的时候会用到
+  vdom.oldRenderVDOM = renderVDOM;
+  return createDOM(renderVDOM);
 }
 
 // 处理 context.consumer
@@ -275,7 +287,9 @@ export function compareTwoVDOM(parentDOM, oldVDOM, newVDOM, nextDOM) {
 }
 
 function updateElement(oldVDOM, newVDOM) {
-  if (oldVDOM.type && oldVDOM.type.$$typeof === REACT_PROVIDER) {
+  if (oldVDOM.type && oldVDOM.type.$$typeof === REACT_MEMO) {
+    updateMemoComponent(oldVDOM, newVDOM);
+  } else if (oldVDOM.type && oldVDOM.type.$$typeof === REACT_PROVIDER) {
     updateProviderComponent(oldVDOM, newVDOM);
   } else if (oldVDOM.type && oldVDOM.type.$$typeof === REACT_CONTEXT) {
     updateContextComponent(oldVDOM, newVDOM);
@@ -301,6 +315,26 @@ function updateElement(oldVDOM, newVDOM) {
       // 函数组件
       updateFunctionComponent(oldVDOM, newVDOM);
     }
+  }
+}
+
+function updateMemoComponent(oldVdom, newVdom) {
+  let { type, prevProps } = oldVdom;
+
+  if (type.compare(prevProps, newVdom.props)) {
+    newVdom.oldRenderVDOM = oldVdom.oldRenderVDOM;
+    newVdom.prevProps = newVdom.props;
+  } else {
+    let parentDOM = findDOM(oldVdom).parentNode;
+    let { type, props } = newVdom;
+    // type.type
+    //  第一个 type: jsx 解析后，生成的 createElement 执行后的 vdom 自带的 type，是一个 memo 对象
+    //  第二个 type: memo 对象自带的 type，代表传入的函数组件
+    // 这里是执行传入的函数组件。并传入最新的 props
+    let renderVDOM = type.type(props);
+    compareTwoVDOM(parentDOM, oldVdom.oldRenderVDOM, renderVDOM);
+    newVdom.prevProps = newVdom.props;
+    newVdom.oldRenderVDOM = renderVDOM;
   }
 }
 

@@ -7,3 +7,6 @@ export const REACT_FORWARD_REF_TYPE = Symbol("react.forward_ref");
 // context 用到的类型
 export const REACT_CONTEXT = Symbol("react.context");
 export const REACT_PROVIDER = Symbol("react.provider");
+
+// memo
+export const REACT_MEMO = Symbol("react.memo");

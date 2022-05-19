@@ -2,9 +2,10 @@ import Component, { PureComponent } from "./component";
 import {
   REACT_CONTEXT,
   REACT_FORWARD_REF_TYPE,
+  REACT_MEMO,
   REACT_PROVIDER,
 } from "./constants";
-import { wrapToVDom } from "./utils";
+import { shallowEqual, wrapToVDom } from "./utils";
 
 const React = {
   createElement,
@@ -14,7 +15,16 @@ const React = {
   createContext,
   cloneElement,
   PureComponent,
+  memo,
 };
+
+function memo(type, compare = shallowEqual) {
+  return {
+    $$typeof: REACT_MEMO,
+    type, //原来那个真正的函数组件
+    compare,
+  };
+}
 
 /**
  * 根据一个老的元素，克隆出一个新的元素
