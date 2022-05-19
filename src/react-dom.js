@@ -7,6 +7,7 @@ import {
 } from "./constants";
 import { addEvent } from "./event";
 
+// 源码里用的是链表，这里用数组模拟，方便理解
 const hookState = [];
 let hookIndex = 0;
 let scheduleUpdate;
@@ -37,6 +38,20 @@ function mount(vdom, container) {
   if (newDOM.componentDidMount) {
     newDOM.componentDidMount();
   }
+}
+
+export function useRef() {
+  // 存在则返回，不存在则初始化 {current: null}
+  if (hookState[hookIndex]) {
+    return hookState[hookIndex++];
+  } else {
+    hookState[hookIndex] = { current: null };
+    return hookState[hookIndex++];
+  }
+}
+
+export function useImperativeHandle(ref, factory) {
+  ref.current = factory();
 }
 
 export function useEffect(callback, deps) {

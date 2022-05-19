@@ -14,6 +14,8 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
+  useImperativeHandle,
 } from "./react-dom";
 
 const React = {
@@ -32,6 +34,8 @@ const React = {
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
+  useImperativeHandle,
 };
 
 function memo(type, compare = shallowEqual) {
