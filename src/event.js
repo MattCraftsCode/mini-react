@@ -39,7 +39,7 @@ function dispatchEvent(event) {
 function createSyntheticEvent(event) {
   let syntheticEvent = {};
   for (let key in event) {
-    syntheticEvent[key] = event;
+    syntheticEvent[key] = event[key];
   }
 
   return syntheticEvent;
