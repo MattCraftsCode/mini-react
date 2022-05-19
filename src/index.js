@@ -1,29 +1,109 @@
 import ReactDOM from "./react-dom";
 import React from "./react";
 
-function Sub() {
-  console.log("Sub render");
-  return <div>Sub</div>;
-}
+const { useState, memo, useMemo, useCallback } = React;
 
-const SubWithMemo = React.memo(Sub);
+// 使用 React.memo 可以浅层比较阻止更新
+if (false) {
+  function Son() {
+    console.log("Son 更新");
+    return <div>Son</div>;
+  }
 
-class App extends React.Component {
-  state = { count: 0 };
+  const SonWithMemo = memo(Son);
 
-  handleClick = () => {
-    this.setState(this.state);
-  };
+  function App() {
+    const [number, setNumber] = useState(0);
 
-  render() {
-    console.log("App render");
+    const change = () => {
+      setNumber(number + 1);
+    };
+
     return (
       <div>
-        <button onClick={this.handleClick}>按钮</button>
-        <SubWithMemo count={this.state.count}></SubWithMemo>
+        <button onClick={change}>按钮:{number}</button>
+        <SonWithMemo></SonWithMemo>
       </div>
     );
   }
+
+  ReactDOM.render(<App></App>, document.getElementById("root"));
 }
 
-ReactDOM.render(<App></App>, document.getElementById("root"));
+// 使用 React.memo，当 fn 重新创建后视为不同的对象，也会更新（浅层比较）
+if (false) {
+  function Son() {
+    console.log("Son 更新");
+    return <div>Son</div>;
+  }
+
+  const SonWithMemo = memo(Son);
+
+  function App() {
+    const [number, setNumber] = useState(0);
+
+    const change = () => {
+      setNumber(number + 1);
+    };
+
+    const data = {
+      name: "hsw",
+    };
+
+    const fn = () => {
+      console.log("fn");
+    };
+
+    return (
+      <div>
+        <button onClick={change}>按钮:{number}</button>
+        <SonWithMemo fn={fn}></SonWithMemo>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App></App>, document.getElementById("root"));
+}
+
+if (true) {
+  function Son() {
+    console.log("Son 更新");
+    return <div>Son</div>;
+  }
+
+  const SonWithMemo = memo(Son);
+
+  function App() {
+    const [number, setNumber] = useState(0);
+
+    const change = () => {
+      setNumber(number + 1);
+    };
+
+    // const data = useMemo(
+    //   () => ({
+    //     number: 1,
+    //   }),
+    //   [this]
+    // );
+
+    // fn 永远不会更新
+    // const fn = useCallback(() => {
+    //   console.log("useCallback", number);
+    // }, []);
+
+    // 当 number 发生变化，fn 更新
+    const fn = useCallback(() => {
+      console.log("useCallback", number);
+    }, [number]);
+
+    return (
+      <div>
+        <button onClick={change}>按钮:{number}</button>
+        <SonWithMemo fn={fn}></SonWithMemo>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App></App>, document.getElementById("root"));
+}

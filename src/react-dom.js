@@ -7,6 +7,10 @@ import {
 } from "./constants";
 import { addEvent } from "./event";
 
+const hookState = [];
+let hookIndex = 0;
+let scheduleUpdate;
+
 /**
  * 把虚拟 DOM 转成 DOM 并插入到文档中
  * @param {} vdom
@@ -14,6 +18,12 @@ import { addEvent } from "./event";
  */
 function render(vdom, container) {
   mount(vdom, container);
+
+  scheduleUpdate = () => {
+    hookIndex = 0;
+    console.log("开始更新", hookState, hookIndex);
+    compareTwoVDOM(container, vdom, vdom);
+  };
 }
 
 function mount(vdom, container) {
@@ -27,6 +37,57 @@ function mount(vdom, container) {
   if (newDOM.componentDidMount) {
     newDOM.componentDidMount();
   }
+}
+
+export function useState(initialState) {
+  hookState[hookIndex] = hookState[hookIndex] || initialState;
+
+  let currentIndex = hookIndex;
+  function setState(newState) {
+    hookState[currentIndex] = newState;
+    scheduleUpdate();
+  }
+  return [hookState[hookIndex++], setState];
+}
+
+export function useMemo(factory, deps) {
+  // 判断是否该值已经设置过了
+  // 为什么这里可以使用全局的 hookIndex？因为更新组件之前，已经重置了 hookIndex = 0
+  if (hookState[hookIndex]) {
+    // 发现前面已经设置过
+    let [lastMemo, lastDeps] = hookState[hookIndex];
+    // 是否每一项都相等（逐项比较新的 deps 和上一次的 lastDeps）
+    let everySome = deps.every((item, index) => item === lastDeps[index]);
+    if (everySome) {
+      hookIndex++;
+      return lastMemo;
+    }
+  }
+
+  // 通过调用 callback，获取到真正要存储的值
+  let newMemo = factory();
+  // 将最新的值，和依赖的数组保存到 hookState
+  hookState[hookIndex++] = [newMemo, deps];
+  return newMemo;
+}
+
+export function useCallback(callback, deps) {
+  // 判断是否该值已经设置过了
+  // 为什么这里可以使用全局的 hookIndex？因为更新组件之前，已经重置了 hookIndex = 0
+  if (hookState[hookIndex]) {
+    // 发现前面已经设置过
+    let [lastMemo, lastDeps] = hookState[hookIndex];
+    // 是否每一项都相等（逐项比较新的 deps 和上一次的 lastDeps）
+    let everySome = deps.every((item, index) => item === lastDeps[index]);
+    if (everySome) {
+      hookIndex++;
+      return lastMemo;
+    }
+  }
+
+  // 将最新的值，和依赖的数组保存到 hookState
+  hookState[hookIndex++] = [callback, deps];
+  return callback;
 }
 
 /**
@@ -374,9 +435,11 @@ function updateFunctionComponent(oldVDOM, newVDOM) {
   const parentDOM = findDOM(oldVDOM).parentNode;
   const { type, props } = newVDOM;
   const renderVDOM = type(props);
-  newVDOM.oldRenderVDOM = renderVDOM;
 
   compareTwoVDOM(parentDOM, oldVDOM.oldRenderVDOM, renderVDOM);
+
+  // 修复 bug: setState 无法执行，应该放到 compareTwoVDOM 之后
+  newVDOM.oldRenderVDOM = renderVDOM;
 }
 
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
