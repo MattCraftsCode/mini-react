@@ -36,6 +36,19 @@ const React = {
   useLayoutEffect,
   useRef,
   useImperativeHandle,
+  Children,
+};
+
+// 封装自己的工具方法，方便在 react-router 的 switch 组件使用
+const Children = {
+  forEach(children, handler) {
+    children = Array.isArray(children) ? children : [children];
+    children.forEach(handler);
+  },
+  map(children, handler) {
+    children = Array.isArray(children) ? children : [children];
+    children.map(handler);
+  },
 };
 
 function memo(type, compare = shallowEqual) {
