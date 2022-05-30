@@ -5,6 +5,11 @@
 - 按最小功能 commit，查看历史提交 + debugger 即可读懂代码
 - 准备了大量的 example，通俗易懂，方便初学者入门
 
+其他项目
+
+- [mini-react-router](https://github.com/heshiweij/mini-react-router)
+- [mini-redux](https://github.com/heshiweij/mini-redux)
+
 ## Usage
 
 install
