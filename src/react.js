@@ -18,27 +18,6 @@ import {
   useImperativeHandle,
 } from "./react-dom";
 
-const React = {
-  createElement,
-  Component,
-  createRef,
-  forwardRef,
-  createContext,
-  cloneElement,
-  PureComponent,
-  memo,
-  useState,
-  useMemo,
-  useCallback,
-  useReducer,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useImperativeHandle,
-  Children,
-};
-
 // 封装自己的工具方法，方便在 react-router 的 switch 组件使用
 const Children = {
   forEach(children, handler) {
@@ -169,5 +148,26 @@ function createElement(type, config, children) {
     ref,
   };
 }
+
+const React = {
+  createElement,
+  Component,
+  createRef,
+  forwardRef,
+  createContext,
+  cloneElement,
+  PureComponent,
+  memo,
+  useState,
+  useMemo,
+  useCallback,
+  useReducer,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useImperativeHandle,
+  Children,
+};
 
 export default React;
