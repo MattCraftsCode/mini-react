@@ -36,6 +36,31 @@ build
 yarn build
 ```
 
+## example
+
+```jsx
+import ReactDOM from "../react-dom";
+import React from "../react";
+
+class Welcome extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      foo: "bar",
+    };
+  }
+
+  render() {
+    return <div>Welcome, {this.props.name}</div>;
+  }
+}
+
+const element = <Welcome name="test"></Welcome>;
+
+ReactDOM.render(element, document.getElementById("root"));
+```
+
 ## Why
 
 当我们需要深入学习 React 时，我们就需要看源码来学习，但是像这种工业级别的库，源码中有很多逻辑是用于处理边缘情况或者是兼容处理逻辑，是不利于我们学习的。
